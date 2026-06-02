@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+langchain = "*"
+faiss-cpu = "*"
+tiktoken = "*"
+langchain-text-splitters = "*"
+langchain-faiss = "*"
+pypdf = "*"
+pinecone-client = "*"
+python-dotenv = "*"
+langchain-ollama = "*"
+langchain-community = "*"
+chromadb = "*"
+langchain-chroma = "*"
+langchain-groq = "*"
+langchain-huggingface = "*"
+sentence-transformers = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
