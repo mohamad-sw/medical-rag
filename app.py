@@ -5,6 +5,9 @@ _vc = _M("langchain_community.chat_models.vertexai")
 _vc.ChatVertexAI = type("ChatVertexAI", (), {})  # type: ignore[attr-defined]
 _sys.modules["langchain_community.chat_models.vertexai"] = _vc
 
+import io
+import os
+
 import chromadb
 import pypdf
 import streamlit as st
@@ -43,7 +46,7 @@ def load_llm():
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-st.title("PDF Q&A — RAG-Powered Document Intelligence")
+st.title("RAG-Powered Document Intelligence")
 st.markdown("""
 Ask questions about any PDF using a fully local **Retrieval-Augmented Generation (RAG)** pipeline.
 
@@ -59,15 +62,54 @@ Ask questions about any PDF using a fully local **Retrieval-Augmented Generation
 
 st.divider()
 
-uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
+DEFAULT_PDF = "medical_diseases_symptoms.pdf"
+DEFAULT_PDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), DEFAULT_PDF)
 
-if uploaded_file and ("current_file" not in st.session_state or st.session_state.current_file != uploaded_file.name):
+SUGGESTIONS = [
+    "What is the ABCDE criteria used to evaluate in skin cancer?",
+    "What is Raynaud's phenomenon and which connective tissue disease is it an early sign of?",
+    "What is a myasthenic crisis and which muscles does it affect?",
+    "What is fibro fog as described in fibromyalgia?",
+]
+
+source = st.radio(
+    "PDF source",
+    ["Upload your file", "Use default file (100 diseases)"],
+    horizontal=True,
+)
+
+using_default = source == "Use default file (100 diseases)"
+
+# Clear cached state on source switch
+if st.session_state.get("pdf_source") != source:
+    st.session_state.pdf_source = source
+    if "vectorstore" in st.session_state:
+        st.session_state.vectorstore.delete_collection()
+    for key in ("vectorstore", "retriever", "current_file", "last_question",
+                "last_chunks", "last_response", "ragas_scores"):
+        st.session_state.pop(key, None)
+
+if using_default:
+    active_name = DEFAULT_PDF
+    needs_indexing = st.session_state.get("current_file") != active_name
+    if needs_indexing:
+        with open(DEFAULT_PDF_PATH, "rb") as f:
+            active_file = io.BytesIO(f.read())
+    else:
+        active_file = None
+else:
+    uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
+    active_file = uploaded_file
+    active_name = uploaded_file.name if uploaded_file else None
+    needs_indexing = bool(active_file and st.session_state.get("current_file") != active_name)
+
+if needs_indexing and active_file:
     if "vectorstore" in st.session_state:
         st.session_state.vectorstore.delete_collection()
 
     bar = st.progress(0, text="Reading PDF...")
 
-    reader = pypdf.PdfReader(uploaded_file)
+    reader = pypdf.PdfReader(active_file)
     documents = [Document(page_content=page.extract_text()) for page in reader.pages]
     bar.progress(25, text="Splitting into chunks...")
 
@@ -82,14 +124,21 @@ if uploaded_file and ("current_file" not in st.session_state or st.session_state
 
     st.session_state.vectorstore = vectorstore
     st.session_state.retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-    st.session_state.current_file = uploaded_file.name
+    st.session_state.current_file = active_name
     st.session_state.pop("last_question", None)
     bar.empty()
 
 if "retriever" in st.session_state:
     st.success(f"Ready — {st.session_state.current_file}")
 
-    question = st.text_input("Ask a question about your PDF")
+    if using_default:
+        st.caption("Suggested questions:")
+        cols = st.columns(2)
+        for i, s in enumerate(SUGGESTIONS):
+            if cols[i % 2].button(s, use_container_width=True):
+                st.session_state["question_input"] = s
+
+    question = st.text_input("Ask a question", key="question_input")
 
     if question:
         prompt = ChatPromptTemplate.from_template("""
