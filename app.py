@@ -1,5 +1,4 @@
-import shutil
-
+import chromadb
 import pypdf
 import streamlit as st
 from dotenv import load_dotenv
@@ -25,10 +24,6 @@ def load_llm():
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-# Clean up any leftover chroma_db from a previous session
-if "vectorstore" not in st.session_state:
-    shutil.rmtree("./chroma_db", ignore_errors=True)
-
 st.title("PDF Q&A")
 
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
@@ -36,7 +31,6 @@ uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 if uploaded_file and ("current_file" not in st.session_state or st.session_state.current_file != uploaded_file.name):
     if "vectorstore" in st.session_state:
         st.session_state.vectorstore.delete_collection()
-        shutil.rmtree("./chroma_db", ignore_errors=True)
 
     bar = st.progress(0, text="Reading PDF...")
 
@@ -50,7 +44,7 @@ if uploaded_file and ("current_file" not in st.session_state or st.session_state
     embeddings = load_embeddings()
     bar.progress(75, text="Building vector store...")
 
-    vectorstore = Chroma.from_documents(chunks, embeddings, persist_directory="./chroma_db", collection_name="data")
+    vectorstore = Chroma.from_documents(chunks, embeddings, client=chromadb.EphemeralClient(), collection_name="data")
     bar.progress(100, text="Done!")
 
     st.session_state.vectorstore = vectorstore
