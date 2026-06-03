@@ -13,6 +13,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
+st.set_page_config(page_title="PDF Q&A", layout="wide")
+
 @st.cache_resource
 def load_embeddings():
     return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -35,7 +37,7 @@ Ask questions about any PDF using a fully local **Retrieval-Augmented Generation
 - At query time, the top-3 most relevant chunks are retrieved and injected into a prompt sent to **LLaMA 3.1 8B** via the Groq inference API
 - The LLM answers strictly from the retrieved context, preventing hallucination on out-of-scope questions
 
-**Stack:** LangChain · ChromaDB · HuggingFace Transformers · Groq · Streamlit
+**Stack:** LangChain · ChromaDB · HuggingFace Transformers · Streamlit
 """)
 
 st.divider()
