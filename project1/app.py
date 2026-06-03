@@ -1,7 +1,6 @@
-import warnings
+
 
 from langchain_huggingface import HuggingFaceEmbeddings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import os
 import shutil
@@ -29,39 +28,14 @@ chunks = splitter.split_documents(documents)
 
 
 # --- 2. Embed & store ---
-# custom embedding
-# embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url="http://localhost:11434")
-# huggingface embedding
+
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-# first run
+
 vectorstore = Chroma.from_documents(chunks, embeddings, persist_directory="./chroma_db", collection_name="data")
-# other runs
-# vectorstore = Chroma(
-#     persist_directory="./chroma_db",
-#     embedding_function=embeddings,
-#     collection_name="data"
-# )
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-print(retriever.invoke("why do bees outperform their rural counterparts?"))
-
-# Test retriever
-# results = retriever.invoke("burger is delicious")
-
-# for i, doc in enumerate(results):
-#     print(f"--- Chunk {i+1} ---")
-#     print(doc.page_content)
-#     print()
-
 # --- 3. LLM ---
-# llm = ChatOllama(
-#     model="gemma3:1b",
-#     temperature=0.7,
-#     base_url="http://localhost:11434",
-#     num_predict=512,
-# )
-
 llm = ChatGroq(model="llama-3.1-8b-instant")
 
 # # --- 4. RAG prompt ---
