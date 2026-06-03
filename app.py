@@ -20,10 +20,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from ragas import EvaluationDataset, SingleTurnSample, evaluate
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from ragas.llms import LangchainLLMWrapper
-from ragas.metrics import AnswerRelevancy, Faithfulness
 
 load_dotenv()
 
@@ -192,6 +188,10 @@ Question: {question}
         if st.button("Evaluate with RAGAS"):
             with st.spinner("Running evaluation — this makes additional LLM calls and takes ~30 seconds..."):
                 try:
+                    from ragas import EvaluationDataset, SingleTurnSample, evaluate
+                    from ragas.embeddings import LangchainEmbeddingsWrapper
+                    from ragas.llms import LangchainLLMWrapper
+                    from ragas.metrics import AnswerRelevancy, Faithfulness
                     evaluator_llm = LangchainLLMWrapper(load_llm())
                     evaluator_emb = LangchainEmbeddingsWrapper(load_embeddings())
 

@@ -8,6 +8,8 @@ langchain-huggingface==1.2.2
 langchain-chroma==1.1.0
 chromadb==1.5.9
 protobuf>=5.0.0,<6.0.0
+pyarrow>=15.0.0,<18.0.0
+datasets>=2.20.0,<3.0.0
 pypdf==6.12.2
 python-dotenv==1.2.2
 sentence-transformers==5.5.1
