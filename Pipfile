@@ -3,7 +3,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[[source]]
+url = "https://download.pytorch.org/whl/cpu"
+verify_ssl = true
+name = "pytorch-cpu"
+
 [packages]
+torch = {version = "==2.5.1+cpu", index = "pytorch-cpu"}
 langchain = "*"
 faiss-cpu = "*"
 tiktoken = "*"
