@@ -92,6 +92,13 @@ Question: {question}
         )
 
         with st.spinner("Generating response..."):
+            chunks = st.session_state.retriever.invoke(question)
             response = rag_chain.invoke(question)
 
         st.write(response)
+
+        with st.expander(f"Retrieved chunks ({len(chunks)})"):
+            for i, chunk in enumerate(chunks):
+                st.markdown(f"**Chunk {i + 1}**")
+                st.caption(chunk.page_content)
+                st.divider()
