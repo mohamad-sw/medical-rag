@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 tempCodeRunnerFile.py
 .streamlit/secrets.toml
+Pipfile
+Pipfile.lock
