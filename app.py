@@ -15,6 +15,12 @@ load_dotenv()
 
 st.set_page_config(page_title="PDF Q&A", layout="wide")
 
+st.markdown("""
+<style>
+    html, body, [class*="css"] { font-size: 20px !important; }
+</style>
+""", unsafe_allow_html=True)
+
 @st.cache_resource
 def load_embeddings():
     return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
