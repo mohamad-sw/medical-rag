@@ -27,6 +27,11 @@ from ragas.metrics import AnswerRelevancy, Faithfulness
 
 load_dotenv()
 
+# On Streamlit Cloud there is no .env; inject st.secrets into os.environ
+for _k, _v in st.secrets.items():
+    if _k not in os.environ:
+        os.environ[_k] = str(_v)
+
 st.set_page_config(page_title="PDF Q&A", layout="wide")
 
 st.markdown("""
