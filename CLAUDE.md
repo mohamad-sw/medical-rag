@@ -15,26 +15,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pipenv install
 
 # Run a script
-pipenv run python project1/app.py
+pipenv run python app.py
 # or using the venv python directly
-/Users/neonlearn/.local/share/virtualenvs/code-OusFg6gK/bin/python3 project1/app.py
+/Users/neonlearn/.local/share/virtualenvs/code-OusFg6gK/bin/python3 app.py
 ```
 
 ## Architecture
 
-This is a **LangChain RAG (Retrieval-Augmented Generation)** project. The single project (`project1/app.py`) follows this pipeline:
+This is a **LangChain RAG (Retrieval-Augmented Generation)** project. `app.py` lives at the repo root and follows this pipeline:
 
-1. **Load & split** — PDFs from `project1/docs/` are loaded with `PyPDFLoader` and chunked via `RecursiveCharacterTextSplitter` (chunk_size=500, overlap=50).
-2. **Embed & store** — Chunks are embedded and persisted to `chroma_db/` using ChromaDB. Two embedding options exist: Ollama (`nomic-embed-text` at `localhost:11434`) and HuggingFace (`all-MiniLM-L6-v2`).
-3. **LLM** — Two LLM options: local Ollama (`gemma3:1b`) or cloud Groq (`llama-3.1-8b-instant`). The active choice is toggled by commenting/uncommenting.
+1. **Load & split** — PDFs from `docs/` are loaded with `pypdf` and chunked via `RecursiveCharacterTextSplitter` (chunk_size=500, overlap=50).
+2. **Embed & store** — Chunks are embedded and persisted to `chroma_db/` using ChromaDB with HuggingFace embeddings (`all-MiniLM-L6-v2`).
+3. **LLM** — Groq (`llama-3.1-8b-instant`), key loaded from `.env` via `python-dotenv`.
 4. **RAG chain** — LangChain LCEL chain: `retriever | format_docs` → `ChatPromptTemplate` → `LLM` → `StrOutputParser`.
-
-### First run vs. subsequent runs
-
-The vector store ingestion code (loading PDFs, splitting, `Chroma.from_documents`) is **commented out** after the first run. On re-runs, ChromaDB is loaded from the persisted `chroma_db/` directory. When adding new documents or changing the embedding model, uncomment the ingestion block and re-run.
+5. **Cleanup** — `chroma_db/` is deleted after every run.
 
 ### Services required
 
-- **Ollama** (if using local LLM/embeddings): must be running at `http://localhost:11434` with the relevant model pulled (`ollama pull nomic-embed-text`, `ollama pull gemma3:1b`)
-- **Groq API key**: currently hardcoded in `app.py:56` — should be moved to `.env` and loaded with `python-dotenv` (the package is already installed)
-- **Pinecone** credentials are in `project1/.env` but not yet wired up in `app.py`
+- **Groq API key**: set `GROQ_API_KEY` in `.env`
+- **Pinecone** credentials are in `.env` but not yet wired up in `app.py`

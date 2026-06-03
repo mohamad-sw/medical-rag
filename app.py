@@ -14,9 +14,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 load_dotenv()
 
 # --- 1. Load & split ---
-reader = pypdf.PdfReader("./project1/docs/data.pdf")
+reader = pypdf.PdfReader("./docs/data.pdf")
 documents = [
-    Document(page_content=page.extract_text(), metadata={"source": "./project1/docs/data.pdf", "page": i})
+    Document(page_content=page.extract_text(), metadata={"source": "./docs/data.pdf", "page": i})
     for i, page in enumerate(reader.pages)
 ]
 chunks = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50).split_documents(documents)
