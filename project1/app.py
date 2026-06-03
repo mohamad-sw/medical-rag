@@ -7,10 +7,11 @@ import shutil
 from dotenv import load_dotenv
 load_dotenv()
 
+import pypdf
+from langchain_core.documents import Document
 from langchain_ollama import ChatOllama
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -19,9 +20,11 @@ from langchain_groq import ChatGroq
 
 
 # --- 1. Load & split ---
-# frist run
-loader = PyPDFLoader("./project1/docs/data.pdf")
-documents = loader.load()
+reader = pypdf.PdfReader("./project1/docs/data.pdf")
+documents = [
+    Document(page_content=page.extract_text(), metadata={"source": "./project1/docs/data.pdf", "page": i})
+    for i, page in enumerate(reader.pages)
+]
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 chunks = splitter.split_documents(documents)
