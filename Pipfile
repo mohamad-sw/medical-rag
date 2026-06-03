@@ -19,6 +19,7 @@ langchain-chroma = "*"
 langchain-groq = "*"
 langchain-huggingface = "*"
 sentence-transformers = "*"
+ragas = "*"
 
 [dev-packages]
 
