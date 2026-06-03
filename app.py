@@ -24,7 +24,21 @@ def load_llm():
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-st.title("PDF Q&A")
+st.title("PDF Q&A — RAG-Powered Document Intelligence")
+st.markdown("""
+Ask questions about any PDF using a fully local **Retrieval-Augmented Generation (RAG)** pipeline.
+
+**How it works:**
+- Uploaded PDFs are parsed and split into overlapping chunks using LangChain's `RecursiveCharacterTextSplitter`
+- Each chunk is embedded into a high-dimensional vector using **HuggingFace's `all-MiniLM-L6-v2`** model, running entirely on-device — no external embedding API
+- Embeddings are indexed in an **in-memory ChromaDB** vector store for fast semantic search
+- At query time, the top-3 most relevant chunks are retrieved and injected into a prompt sent to **LLaMA 3.1 8B** via the Groq inference API
+- The LLM answers strictly from the retrieved context, preventing hallucination on out-of-scope questions
+
+**Stack:** LangChain · ChromaDB · HuggingFace Transformers · Groq · Streamlit
+""")
+
+st.divider()
 
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
