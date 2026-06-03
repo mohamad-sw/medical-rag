@@ -1,6 +1,7 @@
 import shutil
 
 import pypdf
+import streamlit as st
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -13,24 +14,57 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-# --- 1. Load & split ---
-reader = pypdf.PdfReader("./docs/data.pdf")
-documents = [
-    Document(page_content=page.extract_text(), metadata={"source": "./docs/data.pdf", "page": i})
-    for i, page in enumerate(reader.pages)
-]
-chunks = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50).split_documents(documents)
+@st.cache_resource
+def load_embeddings():
+    return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# --- 2. Embed & store ---
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma.from_documents(chunks, embeddings, persist_directory="./chroma_db", collection_name="data")
-retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+@st.cache_resource
+def load_llm():
+    return ChatGroq(model="llama-3.1-8b-instant")
 
-# --- 3. LLM ---
-llm = ChatGroq(model="llama-3.1-8b-instant")
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
 
-# --- 4. Prompt ---
-prompt = ChatPromptTemplate.from_template("""
+# Clean up any leftover chroma_db from a previous session
+if "vectorstore" not in st.session_state:
+    shutil.rmtree("./chroma_db", ignore_errors=True)
+
+st.title("PDF Q&A")
+
+uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
+
+if uploaded_file and ("current_file" not in st.session_state or st.session_state.current_file != uploaded_file.name):
+    if "vectorstore" in st.session_state:
+        st.session_state.vectorstore.delete_collection()
+        shutil.rmtree("./chroma_db", ignore_errors=True)
+
+    bar = st.progress(0, text="Reading PDF...")
+
+    reader = pypdf.PdfReader(uploaded_file)
+    documents = [Document(page_content=page.extract_text()) for page in reader.pages]
+    bar.progress(25, text="Splitting into chunks...")
+
+    chunks = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50).split_documents(documents)
+    bar.progress(50, text="Loading embedding model...")
+
+    embeddings = load_embeddings()
+    bar.progress(75, text="Building vector store...")
+
+    vectorstore = Chroma.from_documents(chunks, embeddings, persist_directory="./chroma_db", collection_name="data")
+    bar.progress(100, text="Done!")
+
+    st.session_state.vectorstore = vectorstore
+    st.session_state.retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+    st.session_state.current_file = uploaded_file.name
+    bar.empty()
+
+if "retriever" in st.session_state:
+    st.success(f"Ready — {st.session_state.current_file}")
+
+    question = st.text_input("Ask a question about your PDF")
+
+    if question:
+        prompt = ChatPromptTemplate.from_template("""
 Answer the question using ONLY the context below.
 If you don't know, say "I don't have enough information."
 
@@ -40,21 +74,14 @@ Context:
 Question: {question}
 """)
 
-def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
+        rag_chain = (
+            {"context": st.session_state.retriever | format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | load_llm()
+            | StrOutputParser()
+        )
 
-# --- 5. Chain ---
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
+        with st.spinner("Generating response..."):
+            response = rag_chain.invoke(question)
 
-# --- 6. Ask ---
-response = rag_chain.invoke("why do bees outperform their rural counterparts?")
-print(response)
-
-# --- 7. Cleanup ---
-vectorstore.delete_collection()
-shutil.rmtree("./chroma_db", ignore_errors=True)
+        st.write(response)

@@ -14,10 +14,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 pipenv install
 
-# Run a script
-pipenv run python app.py
-# or using the venv python directly
-/Users/neonlearn/.local/share/virtualenvs/code-OusFg6gK/bin/python3 app.py
+# Run the Streamlit app
+pipenv run streamlit run app.py
+# or using the venv directly
+/Users/neonlearn/.local/share/virtualenvs/code-OusFg6gK/bin/streamlit run app.py
 ```
 
 ## Architecture
