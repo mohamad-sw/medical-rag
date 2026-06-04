@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) app that answers clinical questions from medical PDF documents — grounded strictly in source content, with built-in response quality evaluation.
 
-**Live demo:** *(add your Streamlit Cloud URL here)*
+**Live demo:** [diseases-rag.streamlit.app](https://diseases-rag.streamlit.app)
 
 ---
 
