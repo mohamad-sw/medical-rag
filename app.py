@@ -60,7 +60,7 @@ You can also **upload any PDF of your own** — clinical guidelines, research pa
 **How it works:**
 - 📄 &nbsp;**Parse & Chunk** — The document is split into overlapping 500-token segments for precise, context-aware retrieval
 - 🔍 &nbsp;**Semantic Embeddings** — Each chunk is embedded with **HuggingFace `all-MiniLM-L6-v2`**, running fully on-device — no external embedding API
-- ⚡ &nbsp;**LLM Answer** — The 3 most relevant chunks are sent to **LLaMA 3.1 8B** via Groq's ultra-fast inference. LLaMA 3.1 8B is a lightweight model, but because it answers *strictly from the retrieved context*, the RAG design compensates — grounding every response in the source document for accuracy that punches well above the model's size
+- ⚡ &nbsp;**LLM Answer** — The 3 most relevant chunks are sent to **LLaMA 3.1 8B**. This is a lightweight model, but because it answers *strictly from the retrieved context*, the RAG design compensates — grounding every response in the source document for accuracy that punches well above the model's size
 - 📊 &nbsp;**Quality Evaluation** — On-demand **RAGAS** scoring measures Faithfulness and Answer Relevancy against the source
 
 **Stack:** LangChain · ChromaDB · HuggingFace · Groq · RAGAS · Streamlit
@@ -72,10 +72,10 @@ DEFAULT_PDF = "medical_diseases_symptoms.pdf"
 DEFAULT_PDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), DEFAULT_PDF)
 
 SUGGESTIONS = [
-    "What is the ABCDE criteria used to evaluate in skin cancer?",
-    "What is Raynaud's phenomenon and which connective tissue disease is it an early sign of?",
-    "What is the classic jaw symptom described in giant cell arteritis?",
     "What is fibro fog as described in fibromyalgia?",
+    "What is the hallmark tremor pattern described in Parkinson's disease?",
+    "What are the three symptoms that form the classic triad of meningitis?",
+    "Which disease is described as producing 'rice-water stools'?"
 ]
 
 source = st.radio(
