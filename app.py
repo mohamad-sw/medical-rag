@@ -47,19 +47,22 @@ def load_llm():
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-st.title("RAG-Powered Document Intelligence")
+st.title("🩺 MedQuery — Clinical Document Intelligence")
 st.markdown("""
-Ask questions about any PDF using a fully local **Retrieval-Augmented Generation (RAG)** pipeline.
+**Ask questions about medical conditions, symptoms, and clinical findings — answered instantly from source documents.**
+
+Pre-loaded with a **100-disease medical reference** covering everything from rare autoimmune conditions to oncology criteria.
+You can also **upload any PDF of your own** — clinical guidelines, research papers, lab reports, or medical textbooks.
+
+---
 
 **How it works:**
-- Uploaded PDFs are parsed and split into overlapping chunks using LangChain's `RecursiveCharacterTextSplitter`
-- Each chunk is embedded into a high-dimensional vector using **HuggingFace's `all-MiniLM-L6-v2`** model, running entirely on-device — no external embedding API
-- Embeddings are indexed in an **in-memory ChromaDB** vector store for fast semantic search
-- At query time, the top-3 most relevant chunks are retrieved and injected into a prompt sent to **LLaMA 3.1 8B** via the Groq inference API
-- The LLM answers strictly from the retrieved context, preventing hallucination on out-of-scope questions
-- Response quality is measured on-demand with **RAGAS** — two reference-free metrics (**Faithfulness** and **Answer Relevancy**) score how grounded and relevant each answer is
+- 📄 &nbsp;**Parse & Chunk** — The document is split into overlapping 500-token segments for precise, context-aware retrieval
+- 🔍 &nbsp;**Semantic Embeddings** — Each chunk is embedded with **HuggingFace `all-MiniLM-L6-v2`**, running fully on-device — no external embedding API
+- ⚡ &nbsp;**LLM Answer** — The 3 most relevant chunks are sent to **LLaMA 3.1 8B** via Groq's ultra-fast inference, which answers *strictly from the retrieved context* — zero hallucination
+- 📊 &nbsp;**Quality Evaluation** — On-demand **RAGAS** scoring measures Faithfulness and Answer Relevancy against the source
 
-**Stack:** LangChain · ChromaDB · HuggingFace Transformers · Streamlit · RAGAS
+**Stack:** LangChain · ChromaDB · HuggingFace · Groq · RAGAS · Streamlit
 """)
 
 st.divider()
