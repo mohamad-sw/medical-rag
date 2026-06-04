@@ -59,7 +59,7 @@ You can also **upload any PDF of your own** — clinical guidelines, research pa
 **How it works:**
 - 📄 &nbsp;**Parse & Chunk** — The document is split into overlapping 500-token segments for precise, context-aware retrieval
 - 🔍 &nbsp;**Semantic Embeddings** — Each chunk is embedded with **HuggingFace `all-MiniLM-L6-v2`**, running fully on-device — no external embedding API
-- ⚡ &nbsp;**LLM Answer** — The 3 most relevant chunks are sent to **LLaMA 3.1 8B** via Groq's ultra-fast inference, which answers *strictly from the retrieved context* — zero hallucination
+- ⚡ &nbsp;**LLM Answer** — The 3 most relevant chunks are sent to **LLaMA 3.1 8B** via Groq's ultra-fast inference. LLaMA 3.1 8B is a lightweight model, but because it answers *strictly from the retrieved context*, the RAG design compensates — grounding every response in the source document for accuracy that punches well above the model's size
 - 📊 &nbsp;**Quality Evaluation** — On-demand **RAGAS** scoring measures Faithfulness and Answer Relevancy against the source
 
 **Stack:** LangChain · ChromaDB · HuggingFace · Groq · RAGAS · Streamlit
