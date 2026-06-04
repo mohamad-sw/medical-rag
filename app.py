@@ -33,6 +33,7 @@ st.set_page_config(page_title="PDF Q&A", layout="wide")
 st.markdown("""
 <style>
     html, body, [class*="css"] { font-size: 20px !important; }
+    .block-container { padding-top: 1.5rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
