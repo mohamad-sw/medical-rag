@@ -70,7 +70,7 @@ DEFAULT_PDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), DEFA
 SUGGESTIONS = [
     "What is the ABCDE criteria used to evaluate in skin cancer?",
     "What is Raynaud's phenomenon and which connective tissue disease is it an early sign of?",
-    "What is a myasthenic crisis and which muscles does it affect?",
+    "What is the classic jaw symptom described in giant cell arteritis?",
     "What is fibro fog as described in fibromyalgia?",
 ]
 
